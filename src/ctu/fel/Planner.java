@@ -283,6 +283,10 @@ public class Planner {
         tSet.add(tVectorCopy);
     }
 
+    private int[] buildSimpleTimeSoC(Edge e) {
+        return new int[] {e.getTime(), Math.max(0, e.getConsumption()), e.getConsumption(), Math.min(batteryCapacity, batteryCapacity - e.getConsumption())};
+    }
+
     /**
      * Link a suffix segment to a path and calculate the combined parameters
      * @param currentLabel  path to be augmented
@@ -290,34 +294,23 @@ public class Planner {
      * @return  the parameter array of the connected path
      */
     private int[] linkPaths(Label currentLabel, Object suffixObject) {
+        int[] suffixParameters;
         if (suffixObject instanceof Edge) {
-            Edge suffixEdge = (Edge) suffixObject;
-            int[] parameters = new int[numPathParameters];
-            int suffixConsumption = suffixEdge.getConsumption();
-
-            // Path Parameter Update function
-            parameters[0] = currentLabel.getTime() +  suffixEdge.getTime();       // time
-            parameters[1] = Math.max(currentLabel.getMinSoCBefore(), currentLabel.getConsumption() + Math.max(0, suffixConsumption));    // minSoCBefore
-            parameters[2] = Math.max(currentLabel.getConsumption() + suffixConsumption, currentLabel.getMinSoCBefore() -
-                    Math.min(batteryCapacity, batteryCapacity - suffixConsumption));            // consumption
-            parameters[3] = Math.min(currentLabel.getMaxSoCAfter() - suffixConsumption, Math.min(batteryCapacity,
-                    batteryCapacity - suffixConsumption));             // maxSoCAfter
-
-            return parameters;
+            suffixParameters = buildSimpleTimeSoC((Edge) suffixObject);
         }
         else {
-            CoverEdge suffixEdge = (CoverEdge) suffixObject;
-            int[] parameters = new int[numPathParameters];
-
-            // Path Parameter Update function
-            parameters[0] = currentLabel.getTime() + suffixEdge.getTime();       // time
-            parameters[1] = Math.max(currentLabel.getMinSoCBefore(), currentLabel.getConsumption() + suffixEdge.getMinSoCBefore());    // minSoCBefore
-            parameters[2] = Math.max(currentLabel.getConsumption() + suffixEdge.getConsumption(), currentLabel.getMinSoCBefore() -
-                    suffixEdge.getMaxSoCAfter());            // consumption
-            parameters[3] = Math.min(currentLabel.getMaxSoCAfter() - suffixEdge.getConsumption(), suffixEdge.getMaxSoCAfter());             // maxSoCAfter
-
-            return parameters;
+            suffixParameters = ((CoverEdge) suffixObject).getParameters();
         }
+        int[] newParameters = new int[numPathParameters];
+
+        // Path Parameter Update function
+        newParameters[0] = currentLabel.getTime() + suffixParameters[0];       // time
+        newParameters[1] = Math.max(currentLabel.getMinSoCBefore(), currentLabel.getConsumption() + suffixParameters[1]);    // minSoCBefore
+        newParameters[2] = Math.max(currentLabel.getConsumption() + suffixParameters[2], currentLabel.getMinSoCBefore() -
+                suffixParameters[3]);            // consumption
+        newParameters[3] = Math.min(currentLabel.getMaxSoCAfter() - suffixParameters[2], suffixParameters[3]);             // maxSoCAfter
+
+        return newParameters;
     }
 
     /**

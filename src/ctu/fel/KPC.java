@@ -157,54 +157,40 @@ public class KPC {
                         if (!tempCoverEdges.containsKey(nextNode)) {
                             tempCoverEdges.put(nextNode, new ArrayList<>());
                         }
-                        tempCoverEdges.get(nextNode).add(newCoverEdge);
-
-                        numCoverEdges += 1;
                         numInitCoverEdges += 1;
 
+                        // Domination pruning
+                        boolean isDominated = false;
+                        List<CoverEdge> toRemove = new ArrayList<>();
+                        for (int v = 0; v < tempCoverEdges.get(nextNode).size(); ++v) {
+                            CoverEdge current = tempCoverEdges.get(nextNode).get(v);
+                            if (Planner.dominanceCheck(current, newCoverEdge)) {
+                                isDominated = true;
+                            }
+                            else if (Planner.dominanceCheck(newCoverEdge, current)) {
+                                toRemove.add(current);
+                            }
+                        }
+
+                        if (isDominated) {
+                            dominationPruned += 1;
+                            continue;
+                        }
+
+                        for (int v = toRemove.size() - 1; v >= 0; --v) {
+                            tempCoverEdges.get(nextNode).remove(toRemove.get(v));
+                            dominationPruned += 1;
+                            numCoverEdges -= 1;
+                        }
+
+                        tempCoverEdges.get(nextNode).add(newCoverEdge);
+                        numCoverEdges += 1;
                         continue;
                     }
 
                     toExpand.push(newCoverEdge);
                 }
             }
-
-            // Domination pruning
-            for (Map.Entry<Integer, List<CoverEdge>> pair : tempCoverEdges.entrySet()) {
-                List<CoverEdge> currentCoverEdges = pair.getValue();
-
-                if (currentCoverEdges.size() < 2) {
-                    continue;
-                }
-
-                TreeSet<Integer> toRemove = new TreeSet<>();
-                boolean[] isDominated = new boolean[currentCoverEdges.size()];
-
-                for (int i = 0; i < currentCoverEdges.size(); ++i) {
-                    if (isDominated[i]) {
-                        continue;
-                    }
-                    for (int j = 0; j < currentCoverEdges.size(); ++j) {
-                        if (isDominated[j] || i == j) {
-                            continue;
-                        }
-
-                        if (Planner.dominanceCheck(currentCoverEdges.get(i), currentCoverEdges.get(j))) {
-                            isDominated[j] = true;
-                            dominationPruned += 1;
-                            toRemove.add(j);
-                        }
-                    }
-                }
-
-                if (!toRemove.isEmpty()) {
-                    numCoverEdges -= toRemove.size();
-                    for (int ind : toRemove.descendingSet()) {
-                        currentCoverEdges.remove(ind);
-                    }
-                }
-            }
-
             outgoingCoverEdges.put(n, tempCoverEdges);
         }
 

@@ -12,7 +12,7 @@ public class Main {
     static void writeToFile(Map<Integer, Set<Label>> paretoSets, String path) throws IOException {
         FileWriter writer = new FileWriter(path);
 
-        writer.write("consumption,minSocAfter,minSocBefore,nodeId,time\n");
+        writer.write("node,parameters\n");
 
         for (Map.Entry<Integer, Set<Label>> pair : paretoSets.entrySet()) {
             TreeSet<Label> sortedSet = new TreeSet<>(pair.getValue());
@@ -29,7 +29,7 @@ public class Main {
     }
 
     public static void main(String[] args) throws Exception {
-        Graph graph = new Graph("/home/tim/Documents/data/USA-road-d.BAY.gr", "/home/tim/Documents/data/USA-road-t.BAY.gr");
+        Graph graph = new Graph("./data/USA-road-d.BAY.gr", "./data/USA-road-t.BAY.gr");
         Planner planner = new Planner();
         KPC kpc = new KPC(graph, 20);
 

@@ -59,24 +59,4 @@ public class Label extends Path implements Comparable<Label> {
     public int[] getParameters() {
         return parameters;
     }
-
-    @Override
-    public int getTime() {
-        return parameters[0];
-    }
-
-    @Override
-    public int getMinSoCBefore() {
-        return parameters[1];
-    }
-
-    @Override
-    public int getConsumption() {
-        return parameters[2];
-    }
-
-    @Override
-    public int getMaxSoCAfter() {
-        return parameters[3];
-    }
 }

@@ -62,13 +62,12 @@ public class Graph {
 
     /**
      * Graph class constructor
-     * @param nodePath  path to the node file of form "elevation, id, latitude, projectedLatitude, longitude, projected Longitude"
-     * @param edgePath  path to the edge file of form "consumption, start, time, end"
-     * @param goalPath  path to the goal file of list of goal indices separated by newlines
+     * @param distancePath  path to the edge distance file
+     * @param timePath  path to the edge time file
      * @throws FileNotFoundException    if any of the files is not found
      */
-    Graph(String nodePath, String edgePath, String goalPath) throws FileNotFoundException {
-//    Graph(String nodePath, String edgePath) throws FileNotFoundException {
+//    Graph(String nodePath, String edgePath, String goalPath) throws FileNotFoundException {
+    Graph(String distancePath, String timePath) throws FileNotFoundException {
         nodes = new ArrayList<>();
         edges = new ArrayList<>();
         goals = new ArrayList<>();
@@ -76,61 +75,70 @@ public class Graph {
         outgoingEdgeIndices = new ArrayList<>();
         incomingEdgeIndices = new ArrayList<>();
 
-        //Read input node file
-        File nodeFile = new File(nodePath);
-        Scanner nodeScan = new Scanner(nodeFile);
-        nodeScan.nextLine();
-        while (nodeScan.hasNextLine()) {
-            String[] split = nodeScan.nextLine().split(",");
-            int id = Integer.parseInt(split[1]);
-            float latProj = Float.parseFloat(split[3]);
-            float lat = Float.parseFloat(split[2]);
-            float lonProj = Float.parseFloat(split[5]);
-            float lon = Float.parseFloat(split[4]);
-            int elevation = Integer.parseInt(split[0]);
+        //Open input distance file
+        File distanceFile = new File(distancePath);
+        Scanner distanceScan = new Scanner(distanceFile);
 
-            nodes.add(new Node(id, elevation, lat, latProj, lon, lonProj));
+        distanceScan.nextLine();
+        distanceScan.nextLine();
+        distanceScan.nextLine();
+        distanceScan.nextLine();
+        String[] splitSizes = distanceScan.nextLine().split(" ");
+
+        numNodes = Integer.parseInt(splitSizes[2]);
+        numEdges = Integer.parseInt(splitSizes[3]);
+
+        distanceScan.nextLine();
+        distanceScan.nextLine();
+
+        // Open input time file
+        File timeFile = new File(timePath);
+        Scanner timeScan = new Scanner(timeFile);
+
+        timeScan.nextLine();
+        timeScan.nextLine();
+        timeScan.nextLine();
+        timeScan.nextLine();
+        timeScan.nextLine();
+        timeScan.nextLine();
+        timeScan.nextLine();
+
+        for (int i = 0; i < numNodes; ++i) {
             outgoingEdgeIndices.add(new ArrayList<>());
             incomingEdgeIndices.add(new ArrayList<>());
         }
-        numNodes = nodes.size();
 
-        // Read input edge file
-        File edgeFile = new File(edgePath);
-        Scanner edgeScan = new Scanner(edgeFile);
-        edgeScan.nextLine();
         int index = 0;
-        while (edgeScan.hasNextLine()) {
-            String[] split = edgeScan.nextLine().split(",");
-            int start = Integer.parseInt(split[1]);
-            int end = Integer.parseInt(split[3]);
-            int time = Integer.parseInt(split[2]);
-            int cons = Integer.parseInt(split[0]);
+        while (distanceScan.hasNextLine()) {
+            String[] split = distanceScan.nextLine().split(" ");
+            int start = Integer.parseInt(split[1]) - 1;
+            int end = Integer.parseInt(split[2]) - 1;
+            int distance = Integer.parseInt(split[3]);
+            int time = Integer.parseInt(timeScan.nextLine().split(" ")[3]);
 
             outgoingEdgeIndices.get(start).add(index);
             incomingEdgeIndices.get(end).add(index);
 
-            edges.add(new Edge(start, end, new int[]{time, cons}));
+            edges.add(new Edge(start, end, new int[]{distance, time}));
             index += 1;
         }
-        numEdges = edges.size();
 
         isGoal = new ArrayList<>(Collections.nCopies(numNodes, false));
 
-//        for (int i = 0; i < 1000; ++i) {
-//            goals.add(i);
-//            isGoal.set(i, true);
-//        }
+        for (int i = 0; i < numNodes; i += 320) {
+            goals.add(i);
+            isGoal.set(i, true);
+        }
 
 //         Read goal file
-        isGoal = new ArrayList<>(Collections.nCopies(numNodes, false));
-        File goalFile = new File(goalPath);
-        Scanner goalScan = new Scanner(goalFile);
-        while (goalScan.hasNextLine()) {
-            int newGoal = Integer.parseInt(goalScan.nextLine());
-            goals.add(newGoal);
-            isGoal.set(newGoal, true);
-        }
+//        isGoal = new ArrayList<>(Collections.nCopies(numNodes, false));
+//        File goalFile = new File(goalPath);
+//        Scanner goalScan = new Scanner(goalFile);
+//        while (goalScan.hasNextLine()) {
+//            int newGoal = Integer.parseInt(goalScan.nextLine());
+//            goals.add(newGoal);
+//            isGoal.set(newGoal, true);
+//        }
     }
 
     public Node getNode(int id) {

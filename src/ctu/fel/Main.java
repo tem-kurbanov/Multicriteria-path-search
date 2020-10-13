@@ -17,17 +17,21 @@ public class Main {
         for (Map.Entry<Integer, Set<Label>> pair : paretoSets.entrySet()) {
             TreeSet<Label> sortedSet = new TreeSet<>(pair.getValue());
             for (Label lab : sortedSet) {
-                String line = lab.getConsumption() + "," + lab.getMaxSoCAfter() + "," + lab.getMinSoCBefore() + "," + lab.getNode() + "," + lab.getTime() + "\n";
-                writer.write(line);
+                StringBuilder line = new StringBuilder(lab.getNode() + " ");
+                for (int i = 9; i < lab.getParameters().length; ++i) {
+                    line.append(lab.getParameters()[i]).append(" ");
+                }
+                line.append("\n");
+                writer.write(line.toString());
             }
         }
         writer.close();
     }
 
     public static void main(String[] args) throws Exception {
-        Graph graph = new Graph("bayern_nodes.csv", "bayern_edges.csv", "bayern_goals.csv");
+        Graph graph = new Graph("/home/tim/Documents/data/USA-road-d.BAY.gr", "/home/tim/Documents/data/USA-road-t.BAY.gr");
         Planner planner = new Planner();
-        KPC kpc = new KPC(graph, 32);
+        KPC kpc = new KPC(graph, 20);
 
 //        planner.setEllipseGoal(graph, 150000);
 //        planner.setEllipseCoefficient(0.1f);
@@ -38,6 +42,6 @@ public class Main {
 
         Map<Integer, Set<Label>> paretoSets = planner.tKpcMls(graph, kpc, 100000);
 
-        writeToFile(paretoSets, "sets.csv");
+//        writeToFile(paretoSets, "sets.csv");
     }
 }

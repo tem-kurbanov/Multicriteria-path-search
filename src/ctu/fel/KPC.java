@@ -220,12 +220,9 @@ public class KPC {
         nodeSequence.addLast(suffix.getEndPoint());
 
         // Path Parameter Update function
-        parameters[0] = coverEdge.getTime() + suffix.getTime();       // time
-        parameters[1] = Math.max(coverEdge.getMinSoCBefore(), coverEdge.getConsumption() + Math.max(0, suffix.getConsumption()));    // minSoCBefore
-        parameters[2] = Math.max(coverEdge.getConsumption() + suffix.getConsumption(), coverEdge.getMinSoCBefore() -
-                Math.min(Planner.getBatteryCapacity(), Planner.getBatteryCapacity() - suffix.getConsumption()));            // consumption
-        parameters[3] = Math.min(coverEdge.getMaxSoCAfter() - suffix.getConsumption(), Math.min(Planner.getBatteryCapacity(),
-                Planner.getBatteryCapacity() - suffix.getConsumption()));             // maxSoCAfter
+        for (int i = 0; i < coverEdge.getParameters().length; ++i) {
+            parameters[i] = coverEdge.getParameters()[i] + suffix.getParameters()[i];
+        }
 
         return new CoverEdge(nodeSequence, parameters);
 

@@ -14,11 +14,11 @@ public class Planner {
     private Node ellipseGoal;
     private float ellipseDistance;
 
-    static final boolean constrained = true;
+    static final boolean constrained = false;
     private static final int batteryCapacity = 40000000;
 
-    private static int numPathParameters = 4;
-    private static final boolean[] maximize = new boolean[] {false, false, false, true};
+    private static int numPathParameters = 2;
+    private static final boolean[] maximize = new boolean[] {false, false};
 
     /**
      * Set the goal for the ellipse heuristic
@@ -118,7 +118,7 @@ public class Planner {
     }
 
     static int[] getInitialPathParameters() {
-        return new int[]{0, 0, 0, batteryCapacity};
+        return new int[]{0, 0};
     }
 
     /**
@@ -127,7 +127,7 @@ public class Planner {
      * @return  true if the path is infeasible, false otherwise
      */
     static boolean infeasiblePath(Path path) {
-        return path.getMinSoCBefore() > batteryCapacity || path.getMaxSoCAfter() < 0;
+        return false;
     }
 
     /**
@@ -284,7 +284,7 @@ public class Planner {
     }
 
     private int[] buildSimpleTimeSoC(Edge e) {
-        return new int[] {e.getTime(), Math.max(0, e.getConsumption()), e.getConsumption(), Math.min(batteryCapacity, batteryCapacity - e.getConsumption())};
+        return new int[] {e.getParameters()[0], e.getParameters()[1]};
     }
 
     /**
@@ -304,11 +304,9 @@ public class Planner {
         int[] newParameters = new int[numPathParameters];
 
         // Path Parameter Update function
-        newParameters[0] = currentLabel.getTime() + suffixParameters[0];       // time
-        newParameters[1] = Math.max(currentLabel.getMinSoCBefore(), currentLabel.getConsumption() + suffixParameters[1]);    // minSoCBefore
-        newParameters[2] = Math.max(currentLabel.getConsumption() + suffixParameters[2], currentLabel.getMinSoCBefore() -
-                suffixParameters[3]);            // consumption
-        newParameters[3] = Math.min(currentLabel.getMaxSoCAfter() - suffixParameters[2], suffixParameters[3]);             // maxSoCAfter
+        for (int i = 0; i < numPathParameters; ++i) {
+            newParameters[i] = currentLabel.getParameters()[i] + suffixParameters[i];
+        }
 
         return newParameters;
     }

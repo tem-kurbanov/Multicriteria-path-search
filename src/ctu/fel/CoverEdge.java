@@ -29,22 +29,6 @@ public class CoverEdge extends Path{
         return (Deque<Integer>) ((LinkedList<Integer>)nodeSequence).clone();
     }
 
-    public int getTime() {
-        return parameters[0];
-    }
-
-    public int getMinSoCBefore() {
-        return parameters[1];
-    }
-
-    public int getConsumption() {
-        return parameters[2];
-    }
-
-    public int getMaxSoCAfter() {
-        return parameters[3];
-    }
-
     public int[] getParameters() {
         return parameters;
     }

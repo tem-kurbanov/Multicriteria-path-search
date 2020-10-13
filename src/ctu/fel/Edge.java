@@ -28,12 +28,4 @@ public class Edge {
     public int getNumParameters() {
         return parameters.length;
     }
-
-    public int getTime() {
-        return parameters[0];
-    }
-
-    public int getConsumption() {
-        return parameters[1];
-    }
 }
